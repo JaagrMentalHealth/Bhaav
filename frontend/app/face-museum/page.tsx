@@ -19,7 +19,7 @@ export default function FaceMuseum() {
   useEffect(() => {
     const fetchEmotions = async () => {
       try {
-        const response = await databases.listDocuments("Emotions", "Emotions") // Database ID & Collection ID
+        const response = await databases.listDocuments("67c98cc3002b3e3dc1a5", "67c98ce00023c7585f67") // Database ID & Collection ID
         const emotionsData = response.documents.map((doc) => ({
           id: doc.id,
           name: doc.name,
