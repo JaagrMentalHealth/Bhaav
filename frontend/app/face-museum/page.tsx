@@ -1,41 +1,39 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import Image from "next/image"
+import { databases } from "@/lib/appwriteConfig"
 
-const emotions = [
-  { id: 1, name: "Happy", image: "/emotions/happy.svg", description: "A feeling of joy and pleasure" },
-  { id: 2, name: "Sad", image: "/emotions/sad.svg", description: "A feeling of sorrow or unhappiness" },
-  { id: 3, name: "Angry", image: "/emotions/angry.svg", description: "A strong feeling of displeasure or hostility" },
-  { id: 4, name: "Surprised", image: "/emotions/surprised.svg", description: "A feeling of astonishment or wonder" },
-  { id: 5, name: "Scared", image: "/emotions/scared.svg", description: "A feeling of fear or being frightened" },
-  {
-    id: 6,
-    name: "Disgusted",
-    image: "/emotions/disgusted.svg",
-    description: "A feeling of strong dislike or disapproval",
-  },
-  {
-    id: 7,
-    name: "Confused",
-    image: "/emotions/confused.svg",
-    description: "A feeling of uncertainty or being puzzled",
-  },
-  {
-    id: 8,
-    name: "Excited",
-    image: "/emotions/excited.svg",
-    description: "A feeling of great enthusiasm and eagerness",
-  },
-  { id: 9, name: "Shy", image: "/emotions/shy.svg", description: "A feeling of being nervous or timid around others" },
-  { id: 10, name: "Proud", image: "/emotions/proud.svg", description: "A feeling of satisfaction from achievements" },
-  { id: 11, name: "Bored", image: "/emotions/bored.svg", description: "A feeling of weariness from lack of interest" },
-  { id: 12, name: "Calm", image: "/emotions/calm.svg", description: "A feeling of peace and tranquility" },
-]
+interface Emotion {
+  id: number
+  name: string
+  image: string
+  description: string
+}
 
 export default function FaceMuseum() {
+  const [emotions, setEmotions] = useState<Emotion[]>([])
   const [selectedEmotion, setSelectedEmotion] = useState<number | null>(null)
+
+  useEffect(() => {
+    const fetchEmotions = async () => {
+      try {
+        const response = await databases.listDocuments("Emotions", "Emotions") // Database ID & Collection ID
+        const emotionsData = response.documents.map((doc) => ({
+          id: doc.id,
+          name: doc.name,
+          image: doc.image,
+          description: doc.description,
+        }))
+        setEmotions(emotionsData)
+      } catch (error) {
+        console.error("Error fetching emotions:", error)
+      }
+    }
+
+    fetchEmotions()
+  }, [])
 
   const handleEmotionClick = (id: number) => {
     setSelectedEmotion(id === selectedEmotion ? null : id)
@@ -103,4 +101,3 @@ export default function FaceMuseum() {
     </div>
   )
 }
-
