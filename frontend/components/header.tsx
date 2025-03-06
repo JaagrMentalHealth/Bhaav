@@ -28,7 +28,7 @@ const Header = () => {
           <div className="relative w-10 h-10 md:w-12 md:h-12">
             <Image src="/logo.svg" alt="EmotiPlay Logo" fill className="object-contain" priority />
           </div>
-          <span className="font-bubblegum text-xl md:text-2xl text-primary">EmotiPlay</span>
+          <span className="font-bubblegum text-xl md:text-2xl text-primary">Bhaav</span>
         </Link>
 
         {/* Desktop Navigation */}
