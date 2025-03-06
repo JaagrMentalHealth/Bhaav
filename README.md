@@ -38,4 +38,4 @@ The goal of **Bhaav** is to provide an accessible and engaging tool for children
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/yourusername/bhaav.git
+   git clone https://github.com/JaagrMentalHealth/Bhaav.git
