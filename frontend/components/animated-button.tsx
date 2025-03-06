@@ -10,7 +10,7 @@ interface AnimatedButtonProps {
   type?: "button" | "submit" | "reset"
 }
 
-const AnimatedButton = ({ children, onClick, className = "btn-primary", type = "button" }: AnimatedButtonProps) => {
+const AnimatedButton = ({ children, onClick, className = "btn-primary bg-card-pink hover:bg-card-pink opacity-90", type = "button" }: AnimatedButtonProps) => {
   return (
     <motion.button
       type={type}

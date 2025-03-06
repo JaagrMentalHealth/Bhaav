@@ -30,7 +30,7 @@ export default function Home() {
               <p className="text-lg mb-6">Join our fun adventure to understand feelings and make new friends!</p>
               <div className="flex flex-wrap gap-4">
                 <AnimatedButton>Start Playing</AnimatedButton>
-                <AnimatedButton className="btn-secondary">Watch Demo</AnimatedButton>
+                <AnimatedButton className="btn-secondary bg-accent-green hover:bg-accent-green">Watch Demo</AnimatedButton>
               </div>
             </motion.div>
 
