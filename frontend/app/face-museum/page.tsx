@@ -17,6 +17,7 @@ export default function FaceMuseum() {
   const [selectedEmotion, setSelectedEmotion] = useState<number | null>(null)
 
   useEffect(() => {
+  let isMounted=true;
     const fetchEmotions = async () => {
       try {
         const response = await databases.listDocuments("67c98cc3002b3e3dc1a5", "67c98ce00023c7585f67") // Database ID & Collection ID
@@ -33,6 +34,10 @@ export default function FaceMuseum() {
     }
 
     fetchEmotions()
+
+    return ()=>{
+      isMounted=false;
+    }
   }, [])
 
   const handleEmotionClick = (id: number) => {
