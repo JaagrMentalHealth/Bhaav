@@ -28,4 +28,3 @@ const AnimatedButton = ({ children, onClick, className = "btn-primary bg-card-pi
 }
 
 export default AnimatedButton
-
