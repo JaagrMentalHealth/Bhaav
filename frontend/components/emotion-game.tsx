@@ -325,7 +325,7 @@ export default function EmotionGame({
     if (!currentEmotion) return null;
 
     return (
-      <div className="flex flex-col items-center overflow-y-scroll">
+      <div className="flex flex-col items-center">
         <div className="relative w-64 h-64 mb-6">
           <Image
             src={
@@ -346,7 +346,7 @@ export default function EmotionGame({
               variant={
                 gameState.selectedAnswer === option ? "default" : "outline"
               }
-              className={`p-4 h-auto text-lg ${
+              className={`p-4 h-auto text-lg   ${
                 quizResult === "correct" && option === currentEmotion.name
                   ? "bg-green-500 hover:bg-green-600"
                   : quizResult === "incorrect" &&
@@ -436,7 +436,7 @@ export default function EmotionGame({
                         ? "default"
                         : "outline"
                     }
-                    className={`p-4 h-auto text-left justify-start ${
+                    className={`p-4 h-auto text-left  justify-start ${
                       quizResult === "correct" &&
                       option === currentQuizQuestion.correctAnswer
                         ? "bg-green-500 hover:bg-green-600"
@@ -445,6 +445,7 @@ export default function EmotionGame({
                         ? "bg-red-500 hover:bg-red-600"
                         : ""
                     }`}
+                  
                     onClick={() => handleQuizAnswer(option)}
                     disabled={gameState.selectedAnswer !== null}
                   >
@@ -510,7 +511,7 @@ export default function EmotionGame({
   };
 
   return (
-    <div className="bg-card rounded-xl p-6 shadow-md">
+    <div className="bg-indigo-800 w-full rounded-xl p-6 shadow-md">
       <div className="flex justify-between items-center mb-6">
         <Button variant="ghost" onClick={onExit}>
           Exit Game
