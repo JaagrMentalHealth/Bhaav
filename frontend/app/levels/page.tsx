@@ -3,26 +3,16 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
+import { databases } from "@/lib/appwriteConfig"
+import type { Emotion } from "@/types/game-types"
+import EmotionGame from "@/components/emotion-game"
 import { motion, AnimatePresence } from "framer-motion"
-import {
-  Lock,
-  Star,
-  Trophy,
-  Gift,
-  Heart,
-  Clock,
-  Target,
-  Zap,
-  Award,
-  ChevronLeft,
-  X,
-  ArrowLeft,
-  Sparkles,
-} from "lucide-react"
+import { Star, Lock, Trophy, Gift, Heart, Clock, Target, Zap, Award, ChevronLeft, X, ArrowLeft, Sparkles } from 'lucide-react'
 import Image from "next/image"
 import Link from "next/link"
 import confetti from "canvas-confetti"
 
+// Import your existing types and data from the attachment
 // Level objectives types
 type ObjectiveType = "score" | "collect" | "clear" | "time"
 
@@ -327,6 +317,45 @@ export default function Levels() {
   const [currentMoves, setCurrentMoves] = useState(0)
   const [objectives, setObjectives] = useState<Objective[]>([])
   const [isLoaded, setIsLoaded] = useState(false)
+  const [emotions, setEmotions] = useState<Emotion[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [showLevelModal, setShowLevelModal] = useState(false)
+  const [showEmotionGame, setShowEmotionGame] = useState(false)
+
+  // Fetch emotions from Appwrite
+  useEffect(() => {
+    let isMounted = true
+    const fetchEmotions = async () => {
+      setIsLoading(true)
+      try {
+        const response = await databases.listDocuments("67c98cc3002b3e3dc1a5", "67c98ce00023c7585f67")
+
+        const emotionsData = response.documents.map((doc) => ({
+          id: doc.$id,
+          name: doc.name,
+          image: doc.image || "/placeholder.svg?height=300&width=300", // Using database image URL
+          description: doc.description,
+        }))
+
+        console.log("Fetched emotions:", emotionsData) // Debug log
+        if (isMounted) {
+          setEmotions(emotionsData)
+        }
+      } catch (error) {
+        console.error("Error fetching emotions:", error)
+      } finally {
+        if (isMounted) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    fetchEmotions()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   useEffect(() => {
     setIsLoaded(true)
@@ -340,24 +369,21 @@ export default function Levels() {
     const level = userLevels.find((l) => l.id === id)
     if (level && level.unlocked) {
       setSelectedLevel(id)
+      setShowLevelModal(true)
     }
   }
 
   const handleStartLevel = () => {
     if (selectedLevel) {
-      const level = userLevels.find((l) => l.id === selectedLevel)
-      if (level) {
-        setCurrentMoves(level.moves)
-        setObjectives([...level.objectives])
-        setShowGameBoard(true)
-      }
+      setShowLevelModal(false)
+      setShowEmotionGame(true)
     }
   }
 
-  const handleCompleteLevel = () => {
+  const handleCompleteLevel = (stars: number) => {
     if (selectedLevel) {
       // Hide game board
-      setShowGameBoard(false)
+      setShowEmotionGame(false)
 
       // Show splash screen
       setShowSplash(true)
@@ -374,13 +400,29 @@ export default function Levels() {
       setUserLevels((prev) =>
         prev.map((level) => {
           if (level.id === selectedLevel) {
-            return { ...level, completed: true, stars: 3 }
+            return { ...level, completed: true, stars }
           }
           if (level.id === selectedLevel + 1) {
             return { ...level, unlocked: true }
           }
           return level
         }),
+      )
+
+      // Save progress to localStorage
+      localStorage.setItem(
+        "emotionGameLevels",
+        JSON.stringify(
+          userLevels.map((level) => {
+            if (level.id === selectedLevel) {
+              return { ...level, completed: true, stars }
+            }
+            if (level.id === selectedLevel + 1) {
+              return { ...level, unlocked: true }
+            }
+            return level
+          }),
+        ),
       )
 
       // Close level modal and splash after a delay
@@ -408,7 +450,7 @@ export default function Levels() {
     // Check if all objectives are complete
     const allComplete = objectives.every((obj) => obj.current >= obj.target)
     if (allComplete || currentMoves === 1) {
-      handleCompleteLevel()
+      handleCompleteLevel(3)
     }
   }
 
@@ -473,7 +515,7 @@ export default function Levels() {
                 </div>
                 <div className="flex items-center gap-1">
                   <div className="text-xs font-bold">
-                    {objective.current}/{objective.target}
+                    {objective.current}{' / '}{objective.target}
                   </div>
                   <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
                     <motion.div
@@ -788,13 +830,13 @@ export default function Levels() {
 
       {/* Level Modal */}
       <AnimatePresence>
-        {selectedLevel && !showGameBoard && (
+        {showLevelModal && selectedLevel && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-            onClick={() => setSelectedLevel(null)}
+            onClick={() => setShowLevelModal(false)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -812,7 +854,7 @@ export default function Levels() {
                   <>
                     <div className="flex items-center justify-between mb-4">
                       <button
-                        onClick={() => setSelectedLevel(null)}
+                        onClick={() => setShowLevelModal(false)}
                         className="p-2 rounded-full hover:bg-muted transition-colors"
                       >
                         <ChevronLeft size={24} className="text-muted-foreground" />
@@ -821,7 +863,7 @@ export default function Levels() {
                         Level {level.id}
                       </h2>
                       <button
-                        onClick={() => setSelectedLevel(null)}
+                        onClick={() => setShowLevelModal(false)}
                         className="p-2 rounded-full hover:bg-muted transition-colors"
                       >
                         <X size={20} className="text-muted-foreground" />
@@ -933,6 +975,34 @@ export default function Levels() {
         )}
       </AnimatePresence>
 
+      {/* Emotion Game */}
+      <AnimatePresence>
+        {showEmotionGame && selectedLevel && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 20 }}
+              className="bg-card rounded-3xl p-4 max-w-4xl w-full shadow-2xl border border-border"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <EmotionGame
+                levelId={selectedLevel}
+                onComplete={handleCompleteLevel}
+                onExit={() => setShowEmotionGame(false)}
+                emotions={emotions}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Game Board Modal */}
       <AnimatePresence>
         {showGameBoard && (
@@ -958,8 +1028,9 @@ export default function Levels() {
 
       {/* Victory Splash Screen */}
       <AnimatePresence>
-        {showSplash && (
-          <motion.div
+        {showSplash &&
+          (
+            <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -999,9 +1070,8 @@ export default function Levels() {
               </motion.div>
             </motion.div>
           </motion.div>
-        )}
+          )}
       </AnimatePresence>
     </div>
   )
 }
-
