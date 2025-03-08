@@ -1,4 +1,4 @@
-# Bhaav
+# Bhaav - (Behle Bachho ka Saathi)
 
 **Bhaav** is an interactive game designed to help children with autism recognize and understand emotions. The application features a comprehensive library of emotions, interactive quizzes for emotion recognition, and engaging animated storytelling that demonstrates coping mechanisms and effective emotional responses.
 
@@ -39,3 +39,4 @@ The goal of **Bhaav** is to provide an accessible and engaging tool for children
 1. **Clone the Repository:**
    ```bash
    git clone https://github.com/JaagrMentalHealth/Bhaav.git
+   ```
