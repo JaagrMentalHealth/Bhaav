@@ -3,9 +3,24 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { Lock, Star, Trophy, Gift, Heart, Clock, Target, Zap, Award, ChevronLeft } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import {
+  Lock,
+  Star,
+  Trophy,
+  Gift,
+  Heart,
+  Clock,
+  Target,
+  Zap,
+  Award,
+  ChevronLeft,
+  X,
+  ArrowLeft,
+  Sparkles,
+} from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 import confetti from "canvas-confetti"
 
 // Level objectives types
@@ -52,21 +67,21 @@ const powerUps: PowerUp[] = [
     name: "Color Bomb",
     description: "Clears all candies of one color",
     icon: <Zap size={20} className="text-white" />,
-    color: "bg-purple-500",
+    color: "bg-primary",
   },
   {
     id: 2,
     name: "Striped Candy",
     description: "Clears an entire row or column",
     icon: <Target size={20} className="text-white" />,
-    color: "bg-blue-500",
+    color: "bg-secondary",
   },
   {
     id: 3,
     name: "Extra Moves",
     description: "+5 extra moves",
     icon: <Award size={20} className="text-white" />,
-    color: "bg-green-500",
+    color: "bg-accent",
   },
 ]
 
@@ -75,7 +90,7 @@ const levels: Level[] = [
     id: 1,
     name: "Sweet Start",
     description: "Match 3 emotions to begin your journey",
-    image: "/levels/level1.svg",
+    image: "/placeholder.svg?height=150&width=150",
     unlocked: true,
     completed: true,
     stars: 3,
@@ -101,7 +116,7 @@ const levels: Level[] = [
     id: 2,
     name: "Emotion Match",
     description: "Match emotions with situations",
-    image: "/levels/level2.svg",
+    image: "/placeholder.svg?height=150&width=150",
     unlocked: true,
     completed: false,
     stars: 0,
@@ -135,7 +150,7 @@ const levels: Level[] = [
     id: 3,
     name: "Emotion Stories",
     description: "Create stories with emotions",
-    image: "/levels/level3.svg",
+    image: "/placeholder.svg?height=150&width=150",
     unlocked: false,
     completed: false,
     stars: 0,
@@ -169,7 +184,7 @@ const levels: Level[] = [
     id: 4,
     name: "Emotion Detective",
     description: "Find hidden emotions in scenes",
-    image: "/levels/level4.svg",
+    image: "/placeholder.svg?height=150&width=150",
     unlocked: false,
     completed: false,
     stars: 0,
@@ -203,7 +218,7 @@ const levels: Level[] = [
     id: 5,
     name: "Emotion Charades",
     description: "Act out and guess emotions",
-    image: "/levels/level5.svg",
+    image: "/placeholder.svg?height=150&width=150",
     unlocked: false,
     completed: false,
     stars: 0,
@@ -245,7 +260,7 @@ const levels: Level[] = [
     id: 6,
     name: "Emotion Master",
     description: "Final challenge with all emotions",
-    image: "/levels/level6.svg",
+    image: "/placeholder.svg?height=150&width=150",
     unlocked: false,
     completed: false,
     stars: 0,
@@ -311,8 +326,10 @@ export default function Levels() {
   const [showGameBoard, setShowGameBoard] = useState(false)
   const [currentMoves, setCurrentMoves] = useState(0)
   const [objectives, setObjectives] = useState<Objective[]>([])
+  const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
+    setIsLoaded(true)
     // Calculate overall game progress
     const completedLevels = userLevels.filter((level) => level.completed).length
     const totalLevels = userLevels.length
@@ -396,7 +413,7 @@ export default function Levels() {
   }
 
   const renderGamePiece = (type: string, size = 40) => {
-    const colors = ["bg-red-400", "bg-blue-400", "bg-green-400", "bg-yellow-400", "bg-purple-400", "bg-pink-400"]
+    const colors = ["bg-red-400", "bg-primary/80", "bg-accent/80", "bg-yellow-400", "bg-secondary/80", "bg-pink-400"]
 
     const randomColor = colors[Math.floor(Math.random() * colors.length)]
 
@@ -406,7 +423,7 @@ export default function Levels() {
         style={{ width: `${size}px`, height: `${size}px` }}
       >
         {type === "special" && <div className="absolute inset-0 bg-white/30 rounded-full animate-pulse"></div>}
-        <div className="text-white font-bold">{type === "special" ? "S" : ""}</div>
+        {type === "special" && <Sparkles size={16} className="text-white" />}
       </div>
     )
   }
@@ -420,12 +437,12 @@ export default function Levels() {
     const { rows, cols } = level.gridSize
 
     return (
-      <div className="bg-gradient-to-b from-purple-100 to-pink-100 p-4 rounded-xl">
+      <div className="bg-gradient-to-b from-primary/5 to-secondary/5 p-4 rounded-xl">
         {/* Game info */}
         <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-2 bg-white/80 px-3 py-1 rounded-full">
-            <div className="text-purple-600 font-bold">Moves:</div>
-            <div className="text-purple-800 font-bold">{currentMoves}</div>
+          <div className="flex items-center gap-2 bg-card px-3 py-1 rounded-full shadow-sm">
+            <div className="text-primary font-bold">Moves:</div>
+            <div className="text-foreground font-bold">{currentMoves}</div>
           </div>
 
           <div className="flex gap-2">
@@ -447,7 +464,7 @@ export default function Levels() {
           {objectives.map((objective, idx) => {
             const progress = Math.min(objective.current / objective.target, 1)
             return (
-              <div key={idx} className="bg-white/80 rounded-lg p-2 flex-shrink-0">
+              <div key={idx} className="bg-card rounded-lg p-2 flex-shrink-0 shadow-sm">
                 <div className="flex items-center gap-2 mb-1">
                   <div className={`${objective.color} w-6 h-6 rounded-full flex items-center justify-center`}>
                     {objective.icon}
@@ -458,7 +475,7 @@ export default function Levels() {
                   <div className="text-xs font-bold">
                     {objective.current}/{objective.target}
                   </div>
-                  <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
                     <motion.div
                       className="h-full bg-gradient-to-r from-green-400 to-green-600"
                       initial={{ width: 0 }}
@@ -474,7 +491,7 @@ export default function Levels() {
 
         {/* Game grid */}
         <div
-          className="grid gap-1 bg-indigo-100 p-2 rounded-lg border-4 border-indigo-300"
+          className="grid gap-1 bg-card/80 p-2 rounded-lg border-2 border-primary/20"
           style={{
             gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
             gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
@@ -501,7 +518,7 @@ export default function Levels() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="px-6 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold rounded-full shadow-lg"
+            className="px-6 py-2 bg-gradient-to-r from-secondary to-primary text-white font-bold rounded-full shadow-lg"
             onClick={() => setShowGameBoard(false)}
           >
             Exit Level
@@ -535,79 +552,116 @@ export default function Levels() {
   }
 
   return (
-    <div className="min-h-screen py-8 px-4 bg-gradient-to-b from-fuchsia-100 via-blue-100 to-purple-100">
-      {/* Decorative elements */}
-      <div className="fixed -top-20 -left-20 w-40 h-40 rounded-full bg-yellow-300 opacity-30 blur-xl"></div>
-      <div className="fixed top-1/3 -right-20 w-40 h-40 rounded-full bg-pink-300 opacity-30 blur-xl"></div>
-      <div className="fixed -bottom-20 left-1/3 w-40 h-40 rounded-full bg-blue-300 opacity-30 blur-xl"></div>
+    <div className="min-h-screen bg-background">
+      {/* Header with decorative elements */}
+      <div className="relative overflow-hidden bg-gradient-to-b from-primary/10 to-background pt-16 pb-24">
+        {/* Decorative elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-0 left-1/4 w-72 h-72 bg-secondary/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-primary/10 rounded-full blur-3xl"></div>
+        </div>
 
-      <div className="container mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          className="text-center mb-6"
-        >
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-600">
-            Emotion Adventure
-          </h1>
-          <p className="text-lg max-w-2xl mx-auto text-indigo-700 mb-4">
-            Complete exciting challenges and earn sweet rewards!
-          </p>
-
-          {/* Overall progress bar */}
-          <div className="max-w-md mx-auto bg-white/50 rounded-full h-4 overflow-hidden mb-2">
-            <motion.div
-              className="h-full bg-gradient-to-r from-pink-500 to-purple-600"
-              initial={{ width: 0 }}
-              animate={{ width: `${gameProgress}%` }}
-              transition={{ duration: 1 }}
-            />
+        <div className="container relative z-10 mx-auto px-4">
+          <div className="flex items-center justify-between mb-6">
+            <Link href="/" className="flex items-center text-muted-foreground hover:text-foreground transition-colors">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              <span>Back to Home</span>
+            </Link>
           </div>
-          <p className="text-sm text-indigo-700 font-medium">Overall Progress: {gameProgress}%</p>
-        </motion.div>
 
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={isLoaded ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7 }}
+            className="text-center mb-12"
+          >
+            <div className="inline-block mb-4">
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary/20 blur-md rounded-full"></div>
+                <div className="relative bg-primary/10 px-6 py-2 rounded-full border border-primary/20">
+                  <span className="text-primary font-medium">Fun Challenges</span>
+                </div>
+              </div>
+            </div>
+
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
+              <span className="bg-gradient-to-r from-primary to-secondary text-transparent bg-clip-text">
+                Emotion Adventure
+              </span>
+            </h1>
+
+            <p className="text-lg md:text-xl max-w-2xl mx-auto text-muted-foreground leading-relaxed">
+              Complete exciting challenges and earn sweet rewards as you master emotional intelligence!
+            </p>
+
+            {/* Overall progress bar */}
+            <div className="max-w-md mx-auto mt-8 bg-muted rounded-full h-4 overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-primary to-secondary"
+                initial={{ width: 0 }}
+                animate={{ width: `${gameProgress}%` }}
+                transition={{ duration: 1 }}
+              />
+            </div>
+            <p className="text-sm text-muted-foreground font-medium mt-2">Overall Progress: {gameProgress}%</p>
+          </motion.div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 -mt-16 relative z-20 mb-24">
         {/* Candy Crush style map with bubbles */}
-        <div className="max-w-4xl mx-auto mb-12 relative">
-          <div className="relative w-full h-[400px] bg-gradient-to-b from-pink-50 to-purple-50 rounded-3xl border-4 border-pink-200 overflow-hidden shadow-xl">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isLoaded ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, delay: 0.2 }}
+          className="max-w-4xl mx-auto mb-12 relative"
+        >
+          <div className="relative w-full h-[450px] bg-card rounded-3xl border border-border overflow-hidden shadow-xl">
             {/* Decorative elements */}
-            <div className="absolute top-10 left-10 w-20 h-20 bg-yellow-200 rounded-full opacity-40"></div>
-            <div className="absolute bottom-20 right-20 w-16 h-16 bg-pink-200 rounded-full opacity-40"></div>
-            <div className="absolute top-1/2 left-1/3 w-12 h-12 bg-blue-200 rounded-full opacity-40"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-secondary/5"></div>
+            <div className="absolute top-10 left-10 w-20 h-20 bg-yellow-200 rounded-full opacity-20"></div>
+            <div className="absolute bottom-20 right-20 w-16 h-16 bg-pink-200 rounded-full opacity-20"></div>
+            <div className="absolute top-1/2 left-1/3 w-12 h-12 bg-blue-200 rounded-full opacity-20"></div>
 
             {/* Clouds */}
             <div className="absolute top-5 left-1/4 flex space-x-1">
-              <div className="w-10 h-6 bg-white rounded-full opacity-70"></div>
-              <div className="w-14 h-8 bg-white rounded-full opacity-70"></div>
-              <div className="w-10 h-6 bg-white rounded-full opacity-70"></div>
+              <div className="w-10 h-6 bg-white rounded-full opacity-50"></div>
+              <div className="w-14 h-8 bg-white rounded-full opacity-50"></div>
+              <div className="w-10 h-6 bg-white rounded-full opacity-50"></div>
             </div>
 
             <div className="absolute bottom-10 right-1/4 flex space-x-1">
-              <div className="w-8 h-5 bg-white rounded-full opacity-70"></div>
-              <div className="w-12 h-7 bg-white rounded-full opacity-70"></div>
-              <div className="w-8 h-5 bg-white rounded-full opacity-70"></div>
+              <div className="w-8 h-5 bg-white rounded-full opacity-50"></div>
+              <div className="w-12 h-7 bg-white rounded-full opacity-50"></div>
+              <div className="w-8 h-5 bg-white rounded-full opacity-50"></div>
             </div>
 
             {/* Trees and decorations */}
             <div className="absolute top-1/4 left-10">
-              <div className="w-12 h-12 bg-green-300 rounded-full"></div>
-              <div className="w-3 h-6 bg-brown-400 mx-auto -mt-1"></div>
+              <div className="w-12 h-12 bg-accent/50 rounded-full"></div>
+              <div className="w-3 h-6 bg-amber-700/50 mx-auto -mt-1"></div>
             </div>
 
             <div className="absolute bottom-1/4 right-10">
-              <div className="w-10 h-10 bg-green-300 rounded-full"></div>
-              <div className="w-2 h-5 bg-brown-400 mx-auto -mt-1"></div>
+              <div className="w-10 h-10 bg-accent/50 rounded-full"></div>
+              <div className="w-2 h-5 bg-amber-700/50 mx-auto -mt-1"></div>
             </div>
 
             {/* Path */}
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
               {/* Dotted path background */}
-              <path d={generatePath()} stroke="#e9d5ff" strokeWidth="8" strokeLinecap="round" fill="none" />
+              <path
+                d={generatePath()}
+                stroke="rgba(var(--primary), 0.2)"
+                strokeWidth="8"
+                strokeLinecap="round"
+                fill="none"
+              />
 
               {/* Solid path foreground */}
               <motion.path
                 d={generatePath()}
-                stroke="#d8b4fe"
+                stroke="rgba(var(--primary), 0.4)"
                 strokeWidth="6"
                 strokeLinecap="round"
                 strokeDasharray="1,1"
@@ -645,7 +699,7 @@ export default function Levels() {
                     {/* Outer glow for active level */}
                     {level.unlocked && !level.completed && (
                       <motion.div
-                        className="absolute inset-0 rounded-full bg-yellow-300"
+                        className="absolute inset-0 rounded-full bg-primary/30"
                         animate={{ scale: [1, 1.2, 1] }}
                         transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
                         style={{ zIndex: -1 }}
@@ -656,14 +710,14 @@ export default function Levels() {
                     <div
                       className={`w-16 h-16 rounded-full flex items-center justify-center shadow-lg ${
                         isLocked
-                          ? "bg-gray-400"
+                          ? "bg-muted"
                           : isCompleted
-                            ? "bg-gradient-to-br from-green-400 to-green-600"
-                            : "bg-gradient-to-br from-pink-400 to-purple-600"
+                            ? "bg-gradient-to-br from-accent to-accent/80"
+                            : "bg-gradient-to-br from-primary to-secondary"
                       }`}
                     >
                       {isLocked ? (
-                        <Lock size={24} className="text-white" />
+                        <Lock size={24} className="text-muted-foreground" />
                       ) : (
                         <span className="text-xl font-bold text-white">{level.id}</span>
                       )}
@@ -677,7 +731,7 @@ export default function Levels() {
                             key={i}
                             size={12}
                             className={
-                              i < level.stars ? "text-yellow-400 fill-yellow-400 -mx-0.5" : "text-gray-300 -mx-0.5"
+                              i < level.stars ? "text-yellow-400 fill-yellow-400 -mx-0.5" : "text-muted -mx-0.5"
                             }
                           />
                         ))}
@@ -688,201 +742,265 @@ export default function Levels() {
               )
             })}
           </div>
+        </motion.div>
+
+        {/* Level guide */}
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
+                  1
+                </div>
+                <h3 className="font-semibold text-lg">Select a Level</h3>
+              </div>
+              <p className="text-muted-foreground">
+                Choose an unlocked level from the adventure map to begin your emotional journey.
+              </p>
+            </div>
+
+            <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
+                  2
+                </div>
+                <h3 className="font-semibold text-lg">Complete Objectives</h3>
+              </div>
+              <p className="text-muted-foreground">
+                Match emotions and complete the level objectives before you run out of moves.
+              </p>
+            </div>
+
+            <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
+                  3
+                </div>
+                <h3 className="font-semibold text-lg">Earn Rewards</h3>
+              </div>
+              <p className="text-muted-foreground">
+                Earn stars and unlock new levels as you progress through your emotional learning adventure.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Level Modal */}
-      {selectedLevel && !showGameBoard && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-          onClick={() => setSelectedLevel(null)}
-        >
+      <AnimatePresence>
+        {selectedLevel && !showGameBoard && (
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", damping: 20 }}
-            className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+            onClick={() => setSelectedLevel(null)}
           >
-            {(() => {
-              const level = userLevels.find((l) => l.id === selectedLevel)
-              if (!level) return null
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 20 }}
+              className="bg-card rounded-3xl p-6 max-w-md w-full shadow-2xl border border-border"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {(() => {
+                const level = userLevels.find((l) => l.id === selectedLevel)
+                if (!level) return null
 
-              return (
-                <>
-                  <div className="flex items-center mb-4">
-                    <button onClick={() => setSelectedLevel(null)} className="p-2 rounded-full hover:bg-gray-100">
-                      <ChevronLeft size={24} />
-                    </button>
-                    <h2 className="text-2xl font-bold ml-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-500">
-                      Level {level.id}
-                    </h2>
-                  </div>
-
-                  <div className="text-center mb-4">
-                    <h3 className="text-xl font-bold text-gray-800">{level.name}</h3>
-                    <p className="text-indigo-700">{level.description}</p>
-                  </div>
-
-                  <div className="relative h-40 bg-gradient-to-b from-purple-200 to-pink-100 rounded-xl mb-6 flex items-center justify-center">
-                    <motion.div
-                      animate={{
-                        rotate: [0, 5, 0, -5, 0],
-                        scale: [1, 1.05, 1, 1.05, 1],
-                      }}
-                      transition={{ duration: 5, repeat: Number.POSITIVE_INFINITY }}
-                    >
-                      <Image
-                        src={level.image || "/placeholder.svg?height=150&width=150"}
-                        alt={level.name}
-                        width={120}
-                        height={120}
-                        className="object-contain drop-shadow-lg"
-                      />
-                    </motion.div>
-                  </div>
-
-                  {/* Level details */}
-                  <div className="bg-purple-50 rounded-xl p-4 mb-6">
-                    <h3 className="font-bold text-purple-800 mb-2">Level Details</h3>
-
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                          <div className="w-6 h-6 bg-purple-400 rounded-lg"></div>
-                        </div>
-                        <div>
-                          <div className="text-gray-600">Grid Size</div>
-                          <div className="font-medium">
-                            {level.gridSize.rows}×{level.gridSize.cols}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center">
-                          <Clock size={20} className="text-pink-500" />
-                        </div>
-                        <div>
-                          <div className="text-gray-600">Moves</div>
-                          <div className="font-medium">{level.moves}</div>
-                        </div>
-                      </div>
+                return (
+                  <>
+                    <div className="flex items-center justify-between mb-4">
+                      <button
+                        onClick={() => setSelectedLevel(null)}
+                        className="p-2 rounded-full hover:bg-muted transition-colors"
+                      >
+                        <ChevronLeft size={24} className="text-muted-foreground" />
+                      </button>
+                      <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
+                        Level {level.id}
+                      </h2>
+                      <button
+                        onClick={() => setSelectedLevel(null)}
+                        className="p-2 rounded-full hover:bg-muted transition-colors"
+                      >
+                        <X size={20} className="text-muted-foreground" />
+                      </button>
                     </div>
 
-                    {/* Objectives */}
-                    <h3 className="font-bold text-purple-800 mt-4 mb-2">Objectives</h3>
-                    <div className="space-y-2">
-                      {level.objectives.map((obj, idx) => (
-                        <div key={idx} className="flex items-center gap-2 bg-white p-2 rounded-lg">
-                          <div className={`${obj.color} w-8 h-8 rounded-full flex items-center justify-center`}>
-                            {obj.icon}
+                    <div className="text-center mb-4">
+                      <h3 className="text-xl font-bold text-foreground">{level.name}</h3>
+                      <p className="text-muted-foreground">{level.description}</p>
+                    </div>
+
+                    <div className="relative h-40 bg-gradient-to-b from-primary/10 to-secondary/10 rounded-xl mb-6 flex items-center justify-center">
+                      <motion.div
+                        animate={{
+                          rotate: [0, 5, 0, -5, 0],
+                          scale: [1, 1.05, 1, 1.05, 1],
+                        }}
+                        transition={{ duration: 5, repeat: Number.POSITIVE_INFINITY }}
+                      >
+                        <Image
+                          src={level.image || "/placeholder.svg?height=150&width=150"}
+                          alt={level.name}
+                          width={120}
+                          height={120}
+                          className="object-contain drop-shadow-lg"
+                        />
+                      </motion.div>
+                    </div>
+
+                    {/* Level details */}
+                    <div className="bg-muted rounded-xl p-4 mb-6">
+                      <h3 className="font-bold text-foreground mb-2">Level Details</h3>
+
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <div className="w-6 h-6 bg-primary/40 rounded-lg"></div>
                           </div>
                           <div>
-                            <div className="text-xs text-gray-600">{obj.label}</div>
-                            <div className="font-medium">{obj.target}</div>
+                            <div className="text-muted-foreground">Grid Size</div>
+                            <div className="font-medium">
+                              {level.gridSize.rows}×{level.gridSize.cols}
+                            </div>
                           </div>
                         </div>
-                      ))}
+
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-secondary/10 rounded-lg flex items-center justify-center">
+                            <Clock size={20} className="text-secondary/70" />
+                          </div>
+                          <div>
+                            <div className="text-muted-foreground">Moves</div>
+                            <div className="font-medium">{level.moves}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Objectives */}
+                      <h3 className="font-bold text-foreground mt-4 mb-2">Objectives</h3>
+                      <div className="space-y-2">
+                        {level.objectives.map((obj, idx) => (
+                          <div key={idx} className="flex items-center gap-2 bg-card p-2 rounded-lg">
+                            <div className={`${obj.color} w-8 h-8 rounded-full flex items-center justify-center`}>
+                              {obj.icon}
+                            </div>
+                            <div>
+                              <div className="text-xs text-muted-foreground">{obj.label}</div>
+                              <div className="font-medium">{obj.target}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Power-ups */}
+                      {level.powerUps.length > 0 && (
+                        <>
+                          <h3 className="font-bold text-foreground mt-4 mb-2">Available Power-ups</h3>
+                          <div className="flex gap-2 flex-wrap">
+                            {level.powerUps.map((powerUp) => (
+                              <div key={powerUp.id} className="bg-card p-2 rounded-lg flex items-center gap-2">
+                                <div
+                                  className={`${powerUp.color} w-8 h-8 rounded-full flex items-center justify-center`}
+                                >
+                                  {powerUp.icon}
+                                </div>
+                                <div className="text-xs">{powerUp.name}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
                     </div>
 
-                    {/* Power-ups */}
-                    {level.powerUps.length > 0 && (
-                      <>
-                        <h3 className="font-bold text-purple-800 mt-4 mb-2">Available Power-ups</h3>
-                        <div className="flex gap-2">
-                          {level.powerUps.map((powerUp) => (
-                            <div key={powerUp.id} className="bg-white p-2 rounded-lg flex items-center gap-2">
-                              <div className={`${powerUp.color} w-8 h-8 rounded-full flex items-center justify-center`}>
-                                {powerUp.icon}
-                              </div>
-                              <div className="text-xs">{powerUp.name}</div>
-                            </div>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="flex justify-center">
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <button
-                        onClick={handleStartLevel}
-                        className="px-8 py-3 text-lg font-bold text-white rounded-full bg-gradient-to-r from-pink-500 to-purple-600 shadow-lg shadow-purple-500/30"
-                      >
-                        Start Level
-                      </button>
-                    </motion.div>
-                  </div>
-                </>
-              )
-            })()}
-          </motion.div>
-        </motion.div>
-      )}
-
-      {/* Game Board Modal */}
-      {showGameBoard && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", damping: 20 }}
-            className="bg-white rounded-2xl p-4 max-w-md w-full shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {renderGameBoard()}
-          </motion.div>
-        </motion.div>
-      )}
-
-      {/* Victory Splash Screen */}
-      {showSplash && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm"
-        >
-          <motion.div
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{
-              scale: [0.5, 1.2, 1],
-              opacity: [0, 1, 1],
-              rotate: [0, 10, -10, 5, -5, 0],
-            }}
-            transition={{ duration: 1 }}
-            className="bg-gradient-to-br from-yellow-300 to-pink-500 p-8 rounded-3xl shadow-2xl flex flex-col items-center"
-          >
-            <Trophy size={80} className="text-yellow-100 mb-4" />
-            <h2 className="text-4xl font-extrabold text-white mb-2">Level Complete!</h2>
-            <div className="flex gap-2 my-3">
-              {[...Array(3)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ scale: 0, rotate: -30 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ delay: 0.3 + i * 0.2, type: "spring" }}
-                >
-                  <Star size={40} className="text-yellow-300 fill-yellow-300" />
-                </motion.div>
-              ))}
-            </div>
-            <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY, repeatDelay: 0.5 }}
-              className="mt-4"
-            >
-              <Gift size={32} className="text-white" />
+                    <div className="flex justify-center">
+                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        <button
+                          onClick={handleStartLevel}
+                          className="px-8 py-3 text-lg font-bold text-white rounded-full bg-gradient-to-r from-primary to-secondary shadow-lg shadow-primary/20"
+                        >
+                          Start Level
+                        </button>
+                      </motion.div>
+                    </div>
+                  </>
+                )
+              })()}
             </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </AnimatePresence>
+
+      {/* Game Board Modal */}
+      <AnimatePresence>
+        {showGameBoard && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 20 }}
+              className="bg-card rounded-3xl p-4 max-w-md w-full shadow-2xl border border-border"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {renderGameBoard()}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Victory Splash Screen */}
+      <AnimatePresence>
+        {showSplash && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 flex items-center justify-center z-50 bg-black/40 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{
+                scale: [0.5, 1.2, 1],
+                opacity: [0, 1, 1],
+                rotate: [0, 10, -10, 5, -5, 0],
+              }}
+              exit={{ scale: 0.5, opacity: 0 }}
+              transition={{ duration: 1 }}
+              className="bg-gradient-to-br from-primary to-secondary p-8 rounded-3xl shadow-2xl flex flex-col items-center"
+            >
+              <Trophy size={80} className="text-primary-foreground mb-4" />
+              <h2 className="text-4xl font-extrabold text-white mb-2">Level Complete!</h2>
+              <div className="flex gap-2 my-3">
+                {[...Array(3)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ scale: 0, rotate: -30 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ delay: 0.3 + i * 0.2, type: "spring" }}
+                  >
+                    <Star size={40} className="text-yellow-300 fill-yellow-300" />
+                  </motion.div>
+                ))}
+              </div>
+              <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY, repeatDelay: 0.5 }}
+                className="mt-4"
+              >
+                <Gift size={32} className="text-white" />
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
