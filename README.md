@@ -1,4 +1,4 @@
-# Bhaav - (Behle Bachho ka Saathi)
+# Bhaav
 
 **Bhaav** is an interactive game designed to help children with autism recognize and understand emotions. The application features a comprehensive library of emotions, interactive quizzes for emotion recognition, and engaging animated storytelling that demonstrates coping mechanisms and effective emotional responses.
 
